@@ -1,17 +1,48 @@
 # Database Initialization Error - Troubleshooting Guide
 
-## Error: "Could not locate the bindings file"
+## Error: "Could not locate the bindings file" or "C++20 or later required"
 
-This error occurs when `better-sqlite3` native bindings aren't properly compiled for your system.
+These errors occur when `better-sqlite3` native bindings can't be compiled for your system.
 
-### Solution 1: Rebuild better-sqlite3 (Quickest)
+### ⚠️ IMPORTANT: Node.js v24 + C++20 Issue
+
+If you see: `error C1189: #error: "C++20 or later required."`
+
+**This is because Node.js v24.11.1 requires C++20, which causes compilation issues.**
+
+**Solution: Downgrade to Node.js LTS (RECOMMENDED) ✅**
+
+Node.js v24 is very recent and has compatibility issues. Use the stable LTS version:
+
+1. **Uninstall Node.js v24.11.1**
+   - Go to Settings > Apps > Node.js > Uninstall
+
+2. **Install Node.js LTS**
+   - Download from https://nodejs.org/
+   - Choose **LTS version** (v22.x or v20.x)
+   - Install with default settings
+
+3. **Verify and rebuild:**
+   ```powershell
+   node --version  # Should show v22.x.x or v20.x.x
+   cd C:\Users\ranah\Downloads\web_al-main\web_al-main\backend
+   Remove-Item -Recurse -Force node_modules, package-lock.json
+   npm install
+   npm run init-db
+   ```
+
+---
+
+## Alternative Solutions (if you must use Node.js v24)
+
+### Solution 1: Rebuild better-sqlite3 (Try first)
 
 ```bash
 cd backend
 npm rebuild better-sqlite3
 ```
 
-### Solution 2: Clean Reinstall (Recommended)
+### Solution 2: Clean Reinstall
 
 ```bash
 cd backend
