@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, Star, Heart } from 'lucide-react';
+import TestDriveModal from './TestDriveModal';
 
 const ProductView = ({ selectedCar, setCurrentPage, mainImage, setMainImage, isZooming, setIsZooming, handleMouseMove, zoomPosition }) => {
+  const [showTestDriveModal, setShowTestDriveModal] = useState(false);
+
   if (!selectedCar) return null;
 
   return (
@@ -60,8 +63,8 @@ const ProductView = ({ selectedCar, setCurrentPage, mainImage, setMainImage, isZ
             </div>
 
             <div className="space-y-4">
-              <button className="w-full bg-black text-white py-4 text-lg font-medium hover:bg-gray-800 transition">Schedule Test Drive</button>
-              <button className="w-full bg-gray-100 border-2 border-black py-4 text-lg font-medium hover:bg-gray-200 transition">Contact Dealer</button>
+              <button onClick={() => setShowTestDriveModal(true)} className="w-full bg-black text-white py-4 text-lg font-medium hover:bg-gray-800 transition">Schedule Test Drive</button>
+              <button onClick={() => setCurrentPage('contact')} className="w-full bg-gray-100 border-2 border-black py-4 text-lg font-medium hover:bg-gray-200 transition">Contact Dealer</button>
               <button className="w-full bg-gray-100 border-2 border-black py-4 text-lg font-medium hover:bg-gray-200 transition flex items-center justify-center"><Heart className="w-5 h-5 mr-2" />Add to Favorites</button>
             </div>
 
@@ -81,6 +84,14 @@ const ProductView = ({ selectedCar, setCurrentPage, mainImage, setMainImage, isZ
           </div>
         </div>
       </div>
+
+      {showTestDriveModal && (
+        <TestDriveModal
+          onClose={() => setShowTestDriveModal(false)}
+          carId={selectedCar.id}
+          carName={selectedCar.name}
+        />
+      )}
     </div>
   );
 };
