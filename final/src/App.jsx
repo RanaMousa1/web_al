@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ChatWidget from './components/ChatWidget';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -9,6 +9,8 @@ import ProductView from './components/ProductView';
 import Footer from './components/Footer';
 import Profile from './components/Profile';
 import Login from './components/Login';
+import ContactPage from './components/ContactPage';
+import API_URL from './config/api';
 
 const CarSellingWebsite = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,101 +20,27 @@ const CarSellingWebsite = () => {
   const [mainImage, setMainImage] = useState(0);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [isZooming, setIsZooming] = useState(false);
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const cars = [
-    {
-      id: 1,
-      name: 'Mercedes-Benz S-Class',
-      price: 89999,
-      year: 2023,
-      mileage: '5,000 mi',
-      fuel: 'Gasoline',
-      transmission: 'Automatic',
-      images: [
-        'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1617531653520-bd788419a0a2?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&h=600&fit=crop'
-      ],
-      rating: 4.8,
-      reviews: 124
-    },
-    {
-      id: 2,
-      name: 'BMW X5',
-      price: 67500,
-      year: 2023,
-      mileage: '8,200 mi',
-      fuel: 'Hybrid',
-      transmission: 'Automatic',
-      images: [
-        'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&h=600&fit=crop'
-      ],
-      rating: 4.6,
-      reviews: 89
-    },
-    {
-      id: 3,
-      name: 'Audi A8',
-      price: 79900,
-      year: 2023,
-      mileage: '3,500 mi',
-      fuel: 'Gasoline',
-      transmission: 'Automatic',
-      images: [
-        'https://images.unsplash.com/photo-1542362567-b07e54358753?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1523986371872-9d3ba2e2f642?w=800&h=600&fit=crop'
-      ],
-      rating: 4.7,
-      reviews: 156
-    },
-    {
-      id: 4,
-      name: 'Tesla Model S',
-      price: 94990,
-      year: 2024,
-      mileage: '1,200 mi',
-      fuel: 'Electric',
-      transmission: 'Automatic',
-      images: [
-        'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&h=600&fit=crop'
-      ],
-      rating: 4.9,
-      reviews: 203
-    },
-    {
-      id: 5,
-      name: 'Porsche Cayenne',
-      price: 82400,
-      year: 2023,
-      mileage: '6,800 mi',
-      fuel: 'Gasoline',
-      transmission: 'Automatic',
-      images: [
-        'https://images.unsplash.com/photo-1614200187524-dc4b892acf16?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&h=600&fit=crop'
-      ],
-      rating: 4.7,
-      reviews: 178
-    },
-    {
-      id: 6,
-      name: 'Range Rover Sport',
-      price: 91500,
-      year: 2023,
-      mileage: '4,300 mi',
-      fuel: 'Hybrid',
-      transmission: 'Automatic',
-      images: [
-        'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&h=600&fit=crop'
-      ],
-      rating: 4.8,
-      reviews: 145
+  // Fetch cars from backend
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        const response = await fetch(`${API_URL}/cars`);
+        const data = await response.json();
+        setCars(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching cars:', error);
+        setLoading(false);
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchCars();
     }
-  ];
+  }, [isLoggedIn]);
 
   const handleMouseMove = (e) => {
     if (!isZooming) return;
@@ -154,9 +82,13 @@ const CarSellingWebsite = () => {
           <div className="py-16 bg-white">
             <div className="max-w-7xl mx-auto px-4">
               <h2 className="text-4xl font-bold mb-8">Featured Vehicles</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {cars.slice(0, 3).map(car => <CarCard key={car.id} car={car} onSelect={handleSelectCar} />)}
-              </div>
+              {loading ? (
+                <div className="text-center py-8">Loading cars...</div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {cars.slice(0, 3).map(car => <CarCard key={car.id} car={car} onSelect={handleSelectCar} />)}
+                </div>
+              )}
             </div>
           </div>
         </>
@@ -196,19 +128,7 @@ const CarSellingWebsite = () => {
       )}
 
       {currentPage === 'contact' && (
-        <div className="py-16 bg-white min-h-screen">
-          <div className="max-w-4xl mx-auto px-4">
-            <h1 className="text-4xl font-bold mb-8">Contact Us</h1>
-            <div className="border-2 border-black p-8">
-              <div className="space-y-4">
-                <input type="text" placeholder="Name" className="w-full px-4 py-3 border-2 border-black" />
-                <input type="email" placeholder="Email" className="w-full px-4 py-3 border-2 border-black" />
-                <textarea placeholder="Message" rows="4" className="w-full px-4 py-3 border-2 border-black"></textarea>
-                <button onClick={() => alert('Message sent!')} className="bg-black text-white px-8 py-3 font-medium hover:bg-gray-800 transition">Send Message</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ContactPage />
       )}
 
       {currentPage === 'profile' && <Profile setCurrentPage={setCurrentPage} />}

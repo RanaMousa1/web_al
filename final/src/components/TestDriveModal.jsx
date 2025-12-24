@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import API_URL from '../config/api';
 
-const TestDriveModal = ({ onClose }) => {
+const TestDriveModal = ({ onClose, carId, carName }) => {
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState("10:00");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [car, setCar] = useState("");
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
   const isValidPhone = (phone) => {
@@ -24,10 +25,10 @@ const TestDriveModal = ({ onClose }) => {
     return hour < 9 || hour > 17;
   };
 
-  const handleConfirm = async () => {   // <-- only change: async
+  const handleConfirm = async () => {
     setMessage("");
 
-    if (!car || !name || !phone) {
+    if (!name || !email || !phone) {
       setMessage("❌ Please fill all fields.");
       return;
     }
@@ -57,32 +58,29 @@ const TestDriveModal = ({ onClose }) => {
       return;
     }
 
-    /* ============================
-       🔗 BACKEND CONNECTION ADDED
-    ============================= */
     try {
-      const response = await fetch("http://localhost:5000/api/book", {
+      const response = await fetch(`${API_URL}/test-drives`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          car,
-          date: date.toDateString(),
-          time,
+          carId: carId,
           name,
-          phone
+          email,
+          phone,
+          date: `${date.toDateString()} ${time}`
         })
       });
 
       const data = await response.json();
 
-      if (data.error) {
-        setMessage("❌ " + data.error);
+      if (response.ok) {
+        setMessage("✅ " + data.message);
       } else {
-        setMessage("✅ Booking saved successfully!");
+        setMessage("❌ " + (data.error || 'Failed to book test drive'));
       }
 
     } catch (err) {
-      setMessage("❌ Server not reachable");
+      setMessage("❌ Could not connect to server");
     }
   };
 
@@ -94,14 +92,15 @@ const TestDriveModal = ({ onClose }) => {
 
         <h2 className="text-2xl font-bold mb-4">Schedule Test Drive</h2>
 
-        <label className="block mb-2 font-medium">Select Car</label>
-        <select value={car} onChange={(e) => setCar(e.target.value)} className="w-full p-3 border rounded mb-4">
-          <option value="">Choose a car</option>
-          <option>Mercedes AMG GT</option>
-          <option>BMW M4</option>
-          <option>Audi RS7</option>
-          <option>Tesla Model S</option>
-        </select>
+        <div className="mb-4">
+          <label className="block mb-2 font-medium">Car</label>
+          <input
+            type="text"
+            value={carName || 'Not specified'}
+            disabled
+            className="w-full p-3 border rounded bg-gray-100"
+          />
+        </div>
 
         <label className="block mb-2 font-medium">Select Date</label>
         <DatePicker
@@ -130,6 +129,14 @@ const TestDriveModal = ({ onClose }) => {
           className="w-full p-3 border rounded mb-4"
           value={name}
           onChange={(e) => setName(e.target.value)}
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-3 border rounded mb-4"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
